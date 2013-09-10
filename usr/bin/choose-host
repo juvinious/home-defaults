@@ -1,0 +1,31 @@
+#!/bin/bash
+
+hostfile=/usr/local/etc/hostnames
+
+hosts=()
+
+function gethosts() {
+    names=`cat $1 | sed -e 's/.*://g' | sed '/^$/d' | sed -e 's/\s.*//g'`
+    count=0
+    for name in $names
+    do
+        printf "%-20s [%+2s]\n" "$name" "$count"
+        hosts[$count]=$name
+        count=$(($count + 1))
+    done
+}
+
+
+value=-1
+while [ $value -eq -1 ]
+do
+    gethosts $hostfile 
+    read -p "Choose host: " choice
+    if [ -z "$choice" ] || [ $choice -lt 0 ] || [ $choice -gt ${#hosts[@]} ]; then
+        continue
+    else
+        value=$choice
+    fi
+done
+
+ssh $(whoami)@${hosts[$value]}
